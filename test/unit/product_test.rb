@@ -24,8 +24,9 @@ class ProductTest < ActiveSupport::TestCase
     assert product.invalid?
     assert_equal "must be greater than or equal to 0.01",
       product.errors[:price].join('; ')
-    product.price = 0
-    assert product.invalid?
+
+    product.price = 1
+    assert product.valid?
   end
 
   def new_product(image_url)
@@ -58,6 +59,30 @@ class ProductTest < ActiveSupport::TestCase
     assert_equal "has already been taken", product.errors[:title].join('; ')
     assert_equal I18n.translate('activerecord.errors.messages.taken'),
                  product.errors[:title].join('; ')
+  end
+
+  test "product title must be at least 10 characters long" do
+    short_title = %w{ ball mercedes christmas }
+    lengthy_title = %w{ rollercoaster motorcycle }
+
+    short_title.each do |title|
+      product = Product.new(:title => title,
+                            :description => "yyy",
+                            :price => 1,
+                            :image_url => "fred.gif")
+      assert product.invalid?
+      assert_equal "is too short and must contain at least 10 characters",
+                   product.errors[:title].join('; ')
+    end
+
+    lengthy_title.each do |title|
+      product = Product.new(:title => title,
+                            :description => "yyy",
+                            :price => 1,
+                            :image_url => "fred.gif")
+      assert product.valid?
+    end
+
   end
 end
 
